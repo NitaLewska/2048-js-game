@@ -1,16 +1,21 @@
 import { Grid } from "./grid.js"
 import { Tile } from "./tile.js"
 
+
 const gameBoard = document.querySelector("#game-board")
 const grid = new Grid(gameBoard)
 
 grid.getRandomEmptyCell().linkTile(new Tile(gameBoard))
 grid.getRandomEmptyCell().linkTile(new Tile(gameBoard))
 setupInputOnce() 
+setupSwipeOnce()
 
 
 function setupInputOnce() {
     window.addEventListener("keydown", handleInput, {once:true})
+}
+function setupSwipeOnce() {
+    window.addEventListener("swiped", handleSwipe, {once:true})
 }
 
 async function handleInput(e) {
@@ -41,6 +46,36 @@ async function handleInput(e) {
     }
 
     setupInputOnce()
+}
+
+async function handleSwipe(e) {
+    switch(e.detail.dir) {
+        case "up":
+            await moveUp()
+            break
+        case "down":
+            await moveDown()
+            break
+        case "left":
+            await moveLeft()
+            break
+        case "right":
+            await moveRight()
+            break
+        default:
+            setupSwipeOnce()
+            return
+    }
+
+    const newTile = new Tile(gameBoard)
+    grid.getRandomEmptyCell().linkTile(newTile)
+
+    if(!grid.getRandomEmptyCell()) {
+        await newTile.waitForAnimationEnd()
+        alert("try again!")
+    }
+
+    setupSwipeOnce()
 }
 
 async function moveUp() {
